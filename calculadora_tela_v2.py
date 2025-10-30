@@ -29,6 +29,14 @@ def cm_to_m_str(cm):
     except Exception:
         return ""
 
+def format_cost(n):
+    """Formatea un número para la visualización de costos."""
+    if isinstance(n, str):
+        return n
+    if isinstance(n, float) and n.is_integer():
+        return int(n)
+    return f"{n:.2f}"
+
 
 # ------------------------
 # LÓGICA DE CÁLCULOS
@@ -213,7 +221,7 @@ class CalculadoraTelaApp:
 
         # panel beige principal (más amplio)
         panel = tk.Frame(frame, bg=self.panel_bg, bd=1, relief="ridge")
-        panel.place(x=12, y=12, width=840, height=520)
+        panel.place(x=12, y=12, width=840, height=540)
 
         # Título interior
         tk.Label(panel, text="Datos del molde y tela", bg=self.panel_bg, font=("Arial", 11, "bold")).place(x=12, y=8)
@@ -349,6 +357,15 @@ class CalculadoraTelaApp:
             self._mostrar_resumen_rapido(res)
             self._actualizar_tab_guardar()
 
+            # Limpiar y precargar costos
+            self.entry_largo_para_costo.delete(0, tk.END)
+            self.entry_cantidad_para_costo.delete(0, tk.END)
+            self.txt_costos.config(state="normal")
+            self.txt_costos.delete(1.0, tk.END)
+            self.txt_costos.config(state="disabled")
+            self.var_precargar.set(True)
+            self._on_precargar_toggle()
+
         else:  # modo con_tela
             try:
                 largo_disponible = float(self.entry_largo_tela.get())
@@ -363,6 +380,15 @@ class CalculadoraTelaApp:
             self.ultimo_resumen = res
             self._mostrar_resumen_rapido(res)
             self._actualizar_tab_guardar()
+
+            # Limpiar y precargar costos
+            self.entry_largo_para_costo.delete(0, tk.END)
+            self.entry_cantidad_para_costo.delete(0, tk.END)
+            self.txt_costos.config(state="normal")
+            self.txt_costos.delete(1.0, tk.END)
+            self.txt_costos.config(state="disabled")
+            self.var_precargar.set(True)
+            self._on_precargar_toggle()
 
         # al calcular, dejamos la pestaña Guardar con la info, costo no se calcula automáticamente
         # (el usuario puede ir a Costos y precargar si desea)
@@ -428,6 +454,9 @@ class CalculadoraTelaApp:
         btn_calc_cost = ttk.Button(frame, text="Calcular costos", command=self._accion_calcular_costos)
         btn_calc_cost.place(x=12, y=252, width=140, height=34)
 
+        btn_limpiar_costos = ttk.Button(frame, text="Limpiar", command=self._accion_limpiar_costos)
+        btn_limpiar_costos.place(x=160, y=252, width=120, height=34)
+
         self.txt_costos = tk.Text(frame, height=8, width=100, state="disabled", wrap="word")
         self.txt_costos.place(x=12, y=300)
 
@@ -444,13 +473,14 @@ class CalculadoraTelaApp:
         # si hay un valor de largo calculado, precargar en entry_largo_para_costo si vacío
         if "largo_total_con_desperdicio_cm" in res:
             if not self.entry_largo_para_costo.get():
-                self.entry_largo_para_costo.insert(0, str(res["largo_total_con_desperdicio_cm"]))
+                self.entry_largo_para_costo.insert(0, str(format_number(res["largo_total_con_desperdicio_cm"])))
             if "cantidad_solicitada" in res and not self.entry_cantidad_para_costo.get():
                 self.entry_cantidad_para_costo.insert(0, str(res["cantidad_solicitada"]))
         elif "largo_utilizable_cm" in res:
             # en modo 'con_tela', podemos precargar el largo utilizable o el largo disponible original
             if not self.entry_largo_para_costo.get():
-                self.entry_largo_para_costo.insert(0, str(res.get("largo_utilizable_cm", res.get("largo_tela_disponible_cm", ""))))
+                largo_val = res.get("largo_utilizable_cm", res.get("largo_tela_disponible_cm", ""))
+                self.entry_largo_para_costo.insert(0, str(format_number(largo_val)))
             if "total_moldes_obtenibles" in res and not self.entry_cantidad_para_costo.get():
                 self.entry_cantidad_para_costo.insert(0, str(res["total_moldes_obtenibles"]))
 
@@ -466,10 +496,10 @@ class CalculadoraTelaApp:
         # mostrar
         self.txt_costos.config(state="normal")
         self.txt_costos.delete(1.0, tk.END)
-        self.txt_costos.insert(tk.END, f"Largo usado (cm): {largo_cm}\n")
-        self.txt_costos.insert(tk.END, f"Precio por metro: {precio_metro}\n")
-        self.txt_costos.insert(tk.END, f"Costo total: {costos['costo_total']}\n")
-        self.txt_costos.insert(tk.END, f"Costo por unidad: {costos['costo_unitario']}\n")
+        self.txt_costos.insert(tk.END, f"Largo usado (cm): {format_cost(largo_cm)}\n")
+        self.txt_costos.insert(tk.END, f"Precio por metro: {format_cost(precio_metro)}\n")
+        self.txt_costos.insert(tk.END, f"Costo total: {format_cost(costos['costo_total'])}\n")
+        self.txt_costos.insert(tk.END, f"Costo por unidad: {format_cost(costos['costo_unitario'])}\n")
         self.txt_costos.config(state="disabled")
         # añadir costos al ultimo resumen (para mostrar y guardar)
         self.ultimo_resumen.update({
@@ -480,6 +510,14 @@ class CalculadoraTelaApp:
         })
         self._actualizar_tab_guardar()
 
+    def _accion_limpiar_costos(self):
+        self.entry_largo_para_costo.delete(0, tk.END)
+        self.entry_precio_metro.delete(0, tk.END)
+        self.entry_cantidad_para_costo.delete(0, tk.END)
+        self.txt_costos.config(state="normal")
+        self.txt_costos.delete(1.0, tk.END)
+        self.txt_costos.config(state="disabled")
+
     # -----------------------------
     # PESTAÑA GUARDAR / RESUMEN VISUAL
     # -----------------------------
@@ -488,26 +526,31 @@ class CalculadoraTelaApp:
         self.nb.add(frame, text="Guardar Resultados")
 
         panel = tk.Frame(frame, bg=self.panel_bg, bd=1, relief="ridge")
-        panel.place(x=12, y=12, width=840, height=480)
+        panel.place(x=12, y=12, width=840, height=540)
         tk.Label(panel, text="Resumen (revisá antes de guardar)", bg=self.panel_bg, font=("Arial", 11, "bold")).place(x=12, y=8)
+
+        # Estilo para Treeview
+        style = ttk.Style()
+        style.configure("Treeview.Heading", font=(None, 10, "bold"))
 
         # Treeview para mostrar la tabla campo-valor (más visual)
         cols = ("campo", "valor")
-        self.tree_resumen = ttk.Treeview(panel, columns=cols, show="headings", height=16)
+        self.tree_resumen = ttk.Treeview(panel, columns=cols, show="headings", height=14)
         self.tree_resumen.heading("campo", text="Campo")
         self.tree_resumen.heading("valor", text="Valor")
         self.tree_resumen.column("campo", width=360, anchor="w")
         self.tree_resumen.column("valor", width=420, anchor="w")
         self.tree_resumen.place(x=12, y=44)
+        self.tree_resumen.tag_configure("bold", font=(None, 10, "bold"))
 
         # Campo de notas
-        tk.Label(panel, text="Notas (opcional):", bg=self.panel_bg).place(x=12, y=420)
+        tk.Label(panel, text="Notas (opcional):", bg=self.panel_bg).place(x=12, y=380)
         self.txt_notas = tk.Text(panel, height=4, width=96, wrap="word")
-        self.txt_notas.place(x=12, y=445)
+        self.txt_notas.place(x=12, y=405)
 
         # Botón guardar (nombre sugerido editable en diálogo)
         btn_guardar = ttk.Button(frame, text="💾 Guardar resultados", command=self._accion_guardar_dialog)
-        btn_guardar.place(x=12, y=510, width=180, height=36)
+        btn_guardar.place(x=650, y=500, width=180, height=36)
 
     def _actualizar_tab_guardar(self):
         # limpia y vuelve a poblar el Treeview con el ultimo_resumen en formato amigable
@@ -542,14 +585,15 @@ class CalculadoraTelaApp:
         }
 
         # transformar campos a texto legible y agregar conversión a metros donde aplique
-        def add_row(k, v):
+        def add_row(k, v, is_bold=False):
             label = friendly_labels.get(k, k)
             # si es medida en cm, añadimos la versión en m entre paréntesis
             if isinstance(v, (int, float)) and ("cm" in (str(k).lower()) or "largo" in str(k).lower() or "ancho" in str(k).lower() or "alto" in str(k).lower()):
                 display = f"{format_number(v)} cm ({float(v)/100:.2f} m)"
             else:
                 display = str(v)
-            self.tree_resumen.insert("", tk.END, values=(label, display))
+            tags = ("bold",) if is_bold else ()
+            self.tree_resumen.insert("", tk.END, values=(label, display), tags=tags)
 
         # orden preferido de campos para mostrar (inteligente)
         pref = [
@@ -562,9 +606,9 @@ class CalculadoraTelaApp:
             "precio_por_metro", "largo_para_costo_cm", "costo_total", "costo_unitario"
         ]
         added = set()
-        for key in pref:
+        for i, key in enumerate(pref):
             if key in self.ultimo_resumen:
-                add_row(key, self.ultimo_resumen[key])
+                add_row(key, self.ultimo_resumen[key], is_bold=(i == 0))
                 added.add(key)
         # añadir el resto de campos no listados
         for k, v in self.ultimo_resumen.items():
