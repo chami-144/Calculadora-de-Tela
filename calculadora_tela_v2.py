@@ -509,6 +509,14 @@ class CalculadoraTelaApp:
         })
         self._actualizar_tab_guardar()
 
+    def _accion_limpiar_costos(self):
+        self.entry_largo_para_costo.delete(0, tk.END)
+        self.entry_precio_metro.delete(0, tk.END)
+        self.entry_cantidad_para_costo.delete(0, tk.END)
+        self.txt_costos.config(state="normal")
+        self.txt_costos.delete(1.0, tk.END)
+        self.txt_costos.config(state="disabled")
+
     # -----------------------------
     # PESTAÑA GUARDAR / RESUMEN VISUAL
     # -----------------------------
