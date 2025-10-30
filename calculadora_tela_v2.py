@@ -213,7 +213,7 @@ class CalculadoraTelaApp:
 
         # panel beige principal (más amplio)
         panel = tk.Frame(frame, bg=self.panel_bg, bd=1, relief="ridge")
-        panel.place(x=12, y=12, width=840, height=520)
+        panel.place(x=12, y=12, width=840, height=540)
 
         # Título interior
         tk.Label(panel, text="Datos del molde y tela", bg=self.panel_bg, font=("Arial", 11, "bold")).place(x=12, y=8)
@@ -349,6 +349,15 @@ class CalculadoraTelaApp:
             self._mostrar_resumen_rapido(res)
             self._actualizar_tab_guardar()
 
+            # Limpiar y precargar costos
+            self.entry_largo_para_costo.delete(0, tk.END)
+            self.entry_cantidad_para_costo.delete(0, tk.END)
+            self.txt_costos.config(state="normal")
+            self.txt_costos.delete(1.0, tk.END)
+            self.txt_costos.config(state="disabled")
+            self.var_precargar.set(True)
+            self._on_precargar_toggle()
+
         else:  # modo con_tela
             try:
                 largo_disponible = float(self.entry_largo_tela.get())
@@ -363,6 +372,15 @@ class CalculadoraTelaApp:
             self.ultimo_resumen = res
             self._mostrar_resumen_rapido(res)
             self._actualizar_tab_guardar()
+
+            # Limpiar y precargar costos
+            self.entry_largo_para_costo.delete(0, tk.END)
+            self.entry_cantidad_para_costo.delete(0, tk.END)
+            self.txt_costos.config(state="normal")
+            self.txt_costos.delete(1.0, tk.END)
+            self.txt_costos.config(state="disabled")
+            self.var_precargar.set(True)
+            self._on_precargar_toggle()
 
         # al calcular, dejamos la pestaña Guardar con la info, costo no se calcula automáticamente
         # (el usuario puede ir a Costos y precargar si desea)
@@ -488,7 +506,7 @@ class CalculadoraTelaApp:
         self.nb.add(frame, text="Guardar Resultados")
 
         panel = tk.Frame(frame, bg=self.panel_bg, bd=1, relief="ridge")
-        panel.place(x=12, y=12, width=840, height=480)
+        panel.place(x=12, y=12, width=840, height=540)
         tk.Label(panel, text="Resumen (revisá antes de guardar)", bg=self.panel_bg, font=("Arial", 11, "bold")).place(x=12, y=8)
 
         # Treeview para mostrar la tabla campo-valor (más visual)
