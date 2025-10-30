@@ -15,11 +15,17 @@ except Exception:
 # ------------------------
 # UTILIDADES NUMÉRICAS
 # ------------------------
+def format_number(n):
+    """Devuelve el número como entero si no tiene decimales significativos."""
+    if isinstance(n, float) and n.is_integer():
+        return int(n)
+    return n
+
 def cm_to_m_str(cm):
     """Devuelve string 'X cm (Y m)' con 2 decimales en metros."""
     try:
         m = float(cm) / 100.0
-        return f"{float(cm):.2f} cm ({m:.2f} m)"
+        return f"{format_number(float(cm))} cm ({m:.2f} m)"
     except Exception:
         return ""
 
@@ -217,13 +223,13 @@ class CalculadoraTelaApp:
         r1 = ttk.Radiobutton(panel, text="Calcular tela según cantidad de objetos/piezas", variable=self.modo_var, value="cantidad", command=self._on_modo_change)
         r1.place(x=12, y=36)
         r2 = ttk.Radiobutton(panel, text="Calcular moldes con X cm de tela", variable=self.modo_var, value="con_tela", command=self._on_modo_change)
-        r2.place(x=380, y=36)
+        r2.place(x=12, y=60)
 
         # Campos (lado izquierdo)
         lbl_x = 12
         val_x = 200
         gap_y = 36
-        y = 72
+        y = 90
 
         tk.Label(panel, text="Ancho utilizable de tela (cm):", bg=self.panel_bg).place(x=lbl_x, y=y)
         self.entry_ancho_tela = ttk.Entry(panel, width=14)
@@ -275,7 +281,7 @@ class CalculadoraTelaApp:
 
         # Área de resultados (más arriba)
         tk.Label(panel, text="Resumen rápido:", bg=self.panel_bg, font=("Arial", 10, "bold")).place(x=12, y=370)
-        self.txt_resumen_rapido = tk.Text(panel, height=6, width=96, state="disabled", wrap="word")
+        self.txt_resumen_rapido = tk.Text(panel, height=8, width=96, state="disabled", wrap="word")
         self.txt_resumen_rapido.place(x=12, y=395)
 
         # set initial mode
@@ -317,8 +323,8 @@ class CalculadoraTelaApp:
             ancho_tela = float(self.entry_ancho_tela.get())
             ancho_molde = float(self.entry_ancho_molde.get())
             alto_molde = float(self.entry_alto_molde.get())
-            margen = float(self.entry_margen.get())
-            desperdicio = float(self.entry_desperdicio.get())
+            margen = float(self.entry_margen.get() or '0')
+            desperdicio = float(self.entry_desperdicio.get() or '0')
         except ValueError:
             messagebox.showerror("Error", "Completá los campos numéricos correctamente (en cm o %).")
             return
@@ -494,6 +500,11 @@ class CalculadoraTelaApp:
         self.tree_resumen.column("valor", width=420, anchor="w")
         self.tree_resumen.place(x=12, y=44)
 
+        # Campo de notas
+        tk.Label(panel, text="Notas (opcional):", bg=self.panel_bg).place(x=12, y=420)
+        self.txt_notas = tk.Text(panel, height=4, width=96, wrap="word")
+        self.txt_notas.place(x=12, y=445)
+
         # Botón guardar (nombre sugerido editable en diálogo)
         btn_guardar = ttk.Button(frame, text="💾 Guardar resultados", command=self._accion_guardar_dialog)
         btn_guardar.place(x=12, y=510, width=180, height=36)
@@ -504,14 +515,41 @@ class CalculadoraTelaApp:
             self.tree_resumen.delete(r)
         if not self.ultimo_resumen:
             return
+
+        # Etiquetas amigables
+        friendly_labels = {
+            "modo": "Modo de cálculo",
+            "ancho_tela_cm": "Ancho de tela (cm)",
+            "ancho_molde_cm": "Ancho del molde (cm)",
+            "alto_molde_cm": "Alto del molde (cm)",
+            "margen_costura_cm_por_lado": "Margen de costura por lado (cm)",
+            "ancho_molde_total_cm": "Ancho del molde total (cm)",
+            "alto_molde_total_cm": "Alto del molde total (cm)",
+            "moldes_por_fila": "Moldes por fila",
+            "filas_necesarias": "Filas necesarias",
+            "cantidad_solicitada": "Cantidad solicitada",
+            "doble_molde": "Molde doble (frente y contrafrente)",
+            "largo_total_sin_desperdicio_cm": "Largo total sin desperdicio (cm)",
+            "largo_total_con_desperdicio_cm": "Largo total con desperdicio (cm)",
+            "largo_tela_disponible_cm": "Largo de tela disponible (cm)",
+            "largo_utilizable_cm": "Largo utilizable (cm)",
+            "filas_posibles": "Filas posibles",
+            "total_moldes_obtenibles": "Total de moldes obtenibles",
+            "precio_por_metro": "Precio por metro",
+            "largo_para_costo_cm": "Largo para costo (cm)",
+            "costo_total": "Costo total",
+            "costo_unitario": "Costo unitario"
+        }
+
         # transformar campos a texto legible y agregar conversión a metros donde aplique
         def add_row(k, v):
+            label = friendly_labels.get(k, k)
             # si es medida en cm, añadimos la versión en m entre paréntesis
             if isinstance(v, (int, float)) and ("cm" in (str(k).lower()) or "largo" in str(k).lower() or "ancho" in str(k).lower() or "alto" in str(k).lower()):
-                display = f"{v} cm ({float(v)/100:.2f} m)"
+                display = f"{format_number(v)} cm ({float(v)/100:.2f} m)"
             else:
                 display = str(v)
-            self.tree_resumen.insert("", tk.END, values=(str(k), display))
+            self.tree_resumen.insert("", tk.END, values=(label, display))
 
         # orden preferido de campos para mostrar (inteligente)
         pref = [
@@ -549,12 +587,17 @@ class CalculadoraTelaApp:
         try:
             # preparar un resumen legible para guardar (campo -> valor, con cm->m formateo)
             resumen_guardado = {}
-            for k, v in self.ultimo_resumen.items():
-                # si parece medida en cm, mantener valor numérico pero también providir string con m
-                if isinstance(v, (int, float)) and ("cm" in (str(k).lower()) or "largo" in str(k).lower() or "ancho" in str(k).lower() or "alto" in str(k).lower()):
-                    resumen_guardado[k] = f"{v} cm ({float(v)/100:.2f} m)"
-                else:
-                    resumen_guardado[k] = v
+            # Usar las mismas etiquetas amigables que en la tabla
+            for child_id in self.tree_resumen.get_children():
+                item = self.tree_resumen.item(child_id)
+                campo, valor = item['values']
+                resumen_guardado[campo] = valor
+
+            # Añadir notas
+            notas = self.txt_notas.get("1.0", tk.END).strip()
+            if notas:
+                resumen_guardado["Notas"] = notas
+
             if filepath.lower().endswith(".txt"):
                 guardar_txt(filepath, resumen_guardado)
             else:
