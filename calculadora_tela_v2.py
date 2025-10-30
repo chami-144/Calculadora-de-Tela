@@ -473,13 +473,14 @@ class CalculadoraTelaApp:
         # si hay un valor de largo calculado, precargar en entry_largo_para_costo si vacío
         if "largo_total_con_desperdicio_cm" in res:
             if not self.entry_largo_para_costo.get():
-                self.entry_largo_para_costo.insert(0, str(res["largo_total_con_desperdicio_cm"]))
+                self.entry_largo_para_costo.insert(0, str(format_number(res["largo_total_con_desperdicio_cm"])))
             if "cantidad_solicitada" in res and not self.entry_cantidad_para_costo.get():
                 self.entry_cantidad_para_costo.insert(0, str(res["cantidad_solicitada"]))
         elif "largo_utilizable_cm" in res:
             # en modo 'con_tela', podemos precargar el largo utilizable o el largo disponible original
             if not self.entry_largo_para_costo.get():
-                self.entry_largo_para_costo.insert(0, str(res.get("largo_utilizable_cm", res.get("largo_tela_disponible_cm", ""))))
+                largo_val = res.get("largo_utilizable_cm", res.get("largo_tela_disponible_cm", ""))
+                self.entry_largo_para_costo.insert(0, str(format_number(largo_val)))
             if "total_moldes_obtenibles" in res and not self.entry_cantidad_para_costo.get():
                 self.entry_cantidad_para_costo.insert(0, str(res["total_moldes_obtenibles"]))
 
