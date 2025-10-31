@@ -363,8 +363,7 @@ class CalculadoraTelaApp:
             self.txt_costos.config(state="normal")
             self.txt_costos.delete(1.0, tk.END)
             self.txt_costos.config(state="disabled")
-            self.var_precargar.set(True)
-            self._on_precargar_toggle()
+            self.var_precargar.set(False)
 
         else:  # modo con_tela
             try:
@@ -387,8 +386,7 @@ class CalculadoraTelaApp:
             self.txt_costos.config(state="normal")
             self.txt_costos.delete(1.0, tk.END)
             self.txt_costos.config(state="disabled")
-            self.var_precargar.set(True)
-            self._on_precargar_toggle()
+            self.var_precargar.set(False)
 
         # al calcular, dejamos la pestaña Guardar con la info, costo no se calcula automáticamente
         # (el usuario puede ir a Costos y precargar si desea)
@@ -587,13 +585,18 @@ class CalculadoraTelaApp:
         # transformar campos a texto legible y agregar conversión a metros donde aplique
         def add_row(k, v, is_bold=False):
             label = friendly_labels.get(k, k)
+            display_val = v
+
+            if k == "doble_molde":
+                display_val = "Requiere" if v else "No requiere"
             # si es medida en cm, añadimos la versión en m entre paréntesis
-            if isinstance(v, (int, float)) and ("cm" in (str(k).lower()) or "largo" in str(k).lower() or "ancho" in str(k).lower() or "alto" in str(k).lower()):
-                display = f"{format_number(v)} cm ({float(v)/100:.2f} m)"
+            elif isinstance(v, (int, float)) and ("cm" in (str(k).lower()) or "largo" in str(k).lower() or "ancho" in str(k).lower() or "alto" in str(k).lower()):
+                display_val = f"{format_number(v)} cm ({float(v)/100:.2f} m)"
             else:
-                display = str(v)
+                display_val = str(v)
+
             tags = ("bold",) if is_bold else ()
-            self.tree_resumen.insert("", tk.END, values=(label, display), tags=tags)
+            self.tree_resumen.insert("", tk.END, values=(label, display_val), tags=tags)
 
         # orden preferido de campos para mostrar (inteligente)
         pref = [
