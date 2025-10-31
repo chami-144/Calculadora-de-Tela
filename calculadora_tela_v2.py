@@ -142,8 +142,8 @@ def calcular_costos_desde_largo(largo_tela_cm, precio_por_metro, cantidad_unidad
         costo_unitario = costo_total / cantidad_unidades
     return {
         "precio_por_cm": round(precio_por_cm, 6),
-        "costo_total": round(costo_total, 4),
-        "costo_unitario": (round(costo_unitario, 6) if costo_unitario is not None else "N/A")
+        "costo_total": round(costo_total, 2),
+        "costo_unitario": (round(costo_unitario, 2) if costo_unitario is not None else "N/A")
     }
 
 
