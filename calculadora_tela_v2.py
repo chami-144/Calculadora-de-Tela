@@ -590,7 +590,12 @@ class CalculadoraTelaApp:
             if k == "doble_molde":
                 display_val = "Requiere" if v else "No requiere"
             # Formatear campos de costo
-            elif k in ["precio_por_metro", "costo_total", "costo_unitario"]:
+            elif k == "costo_unitario":
+                if isinstance(v, (int, float)):
+                    display_val = f"{v:.2f}"
+                else:
+                    display_val = v
+            elif k in ["precio_por_metro", "costo_total"]:
                 if isinstance(v, (int, float)):
                     display_val = format_number(v)
                 else:
