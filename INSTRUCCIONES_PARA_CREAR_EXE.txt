@@ -1,0 +1,37 @@
+¡Hola!
+
+Aquí están las instrucciones paso a paso para crear el archivo .exe de la "Calculadora de Tela" en tu propia computadora.
+
+**Requisitos:**
+- Tener Python instalado en tu PC.
+- Tener el archivo `calculadora_tela_v2.py` que hemos preparado.
+
+**Pasos:**
+
+1.  **Abre una Terminal o Símbolo del Sistema:**
+    *   En Windows, ve al menú de Inicio y busca "cmd" o "Símbolo del sistema". Ábrelo.
+
+2.  **Instala PyInstaller:**
+    *   Si nunca has usado PyInstaller, necesitarás instalarlo. Escribe el siguiente comando en la terminal y presiona Enter:
+        ```
+        pip install pyinstaller
+        ```
+
+3.  **Navega a la Carpeta Correcta:**
+    *   Usa el comando `cd` para moverte a la carpeta donde guardaste `calculadora_tela_v2.py`.
+    *   Por ejemplo, si está en tu Escritorio, el comando sería:
+        ```
+        cd Desktop
+        ```
+
+4.  **Genera el Archivo .exe:**
+    *   Ahora, ejecuta el comando principal. Copia y pega lo siguiente en la terminal y presiona Enter:
+        ```
+        pyinstaller --onefile --windowed --name CalculadoraTela calculadora_tela_v2.py
+        ```
+
+**¿Dónde está el archivo final?**
+
+Una vez que el comando termine, PyInstaller creará una nueva carpeta llamada `dist` dentro del mismo directorio.
+
+¡Tu archivo `CalculadoraTela.exe` estará dentro de esa carpeta `dist`! Ya puedes hacerle doble clic para ejecutar la aplicación.
