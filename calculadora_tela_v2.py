@@ -589,6 +589,12 @@ class CalculadoraTelaApp:
 
             if k == "doble_molde":
                 display_val = "Requiere" if v else "No requiere"
+            # Formatear campos de costo
+            elif k in ["precio_por_metro", "costo_total", "costo_unitario"]:
+                if isinstance(v, (int, float)):
+                    display_val = format_number(v)
+                else:
+                    display_val = v
             # si es medida en cm, añadimos la versión en m entre paréntesis
             elif isinstance(v, (int, float)) and ("cm" in (str(k).lower()) or "largo" in str(k).lower() or "ancho" in str(k).lower() or "alto" in str(k).lower()):
                 display_val = f"{format_number(v)} cm ({float(v)/100:.2f} m)"
