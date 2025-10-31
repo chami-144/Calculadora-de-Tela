@@ -363,8 +363,7 @@ class CalculadoraTelaApp:
             self.txt_costos.config(state="normal")
             self.txt_costos.delete(1.0, tk.END)
             self.txt_costos.config(state="disabled")
-            self.var_precargar.set(True)
-            self._on_precargar_toggle()
+            self.var_precargar.set(False)
 
         else:  # modo con_tela
             try:
@@ -387,8 +386,7 @@ class CalculadoraTelaApp:
             self.txt_costos.config(state="normal")
             self.txt_costos.delete(1.0, tk.END)
             self.txt_costos.config(state="disabled")
-            self.var_precargar.set(True)
-            self._on_precargar_toggle()
+            self.var_precargar.set(False)
 
         # al calcular, dejamos la pestaña Guardar con la info, costo no se calcula automáticamente
         # (el usuario puede ir a Costos y precargar si desea)
