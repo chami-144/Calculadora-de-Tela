@@ -1,0 +1,17 @@
+¡Hola!
+
+Aquí tienes las instrucciones súper sencillas para probar la nueva aplicación web de la Calculadora de Tela.
+
+**Pasos:**
+
+1.  **Encuentra el archivo `index.html`:**
+    *   Dentro de la carpeta de nuestro proyecto, verás una nueva carpeta llamada `web`.
+    *   Entra en esa carpeta `web`. Ahí dentro está el archivo `index.html`.
+
+2.  **Abre el archivo en tu navegador:**
+    *   La forma más fácil es hacer **doble clic** sobre el archivo `index.html`. Esto debería abrirlo automáticamente en tu navegador predeterminado (como Chrome, Firefox, o Edge).
+    *   Si eso no funciona, puedes arrastrar el archivo `index.html` y soltarlo directamente sobre una ventana abierta de tu navegador.
+
+¡Y eso es todo! La aplicación se cargará y podrás empezar a usarla inmediatamente.
+
+Como es una aplicación web, puedes abrir este mismo archivo `index.html` en el navegador de tu celular (si transfieres la carpeta a tu teléfono), y también funcionará.
